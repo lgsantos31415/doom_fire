@@ -4,6 +4,7 @@ let numberOfCells = width * height;
 let array = Array(numberOfCells).fill(0);
 let canva = document.getElementById("canva");
 let cellSize = (window.innerHeight - 200) / height;
+let cells = [];
 let palette = [
   "#070707",
   "#1F0707",
@@ -49,6 +50,7 @@ let debug = row.children[0];
 let bstart = row.children[1];
 let pause = row.children[2];
 let restart = row.children[3];
+let interval;
 
 function searchTable(row, col) {
   return row * width + col;
@@ -79,6 +81,7 @@ function createTable() {
       td.style.height = `${cellSize}px`;
 
       tr.appendChild(td);
+      cells.push(td);
     }
     tbody.appendChild(tr);
   }
@@ -94,9 +97,40 @@ function ignition() {
   }
 }
 
+function propagation() {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width - 1; x++) {
+      let index = searchTable(x, y);
+      let indexBelow = index + height;
+      let randInt = Math.floor(Math.random() * 15);
+
+      array[index] = Math.max(array[indexBelow] - randInt, 0);
+    }
+  }
+}
+
+function updateTable() {
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let index = searchTable(x, y);
+
+      cells[index].style.background = palette[array[index]];
+
+      let p = cells[index].querySelector("p");
+      p.innerText = array[index];
+    }
+  }
+}
+
 function start() {
   createTable();
   ignition();
+  updateTable();
+}
+
+function loop() {
+  propagation();
+  updateTable();
 }
 
 start();
