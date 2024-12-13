@@ -44,6 +44,13 @@ let palette = [
   "#EFEFC7",
   "#FFFFFF",
 ];
+let lastTwoColumns = [];
+for (let x = width - 2; x < width; x++) {
+  for (let y = 0; y < height; y++) {
+    let index = searchTable(y, x);
+    lastTwoColumns.push(index);
+  }
+}
 
 let row = document.getElementById("row");
 let debug = row.children[0];
@@ -162,8 +169,13 @@ function propagation() {
       let index = searchTable(x, y);
       let indexBelow = index + height;
       let randInt = Math.floor(Math.random() * 12);
+      let randWind = Math.floor(Math.random() * 3);
 
-      array[index] = Math.max(array[indexBelow] - randInt, 0);
+      if (lastTwoColumns.includes(index)) {
+        array[index] = Math.max(array[indexBelow] - randInt, 0);
+      } else {
+        array[index] = Math.max(array[indexBelow + randWind] - randInt, 0);
+      }
     }
   }
 }
