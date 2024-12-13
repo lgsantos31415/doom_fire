@@ -1,5 +1,5 @@
-let width = 8;
-let height = 8;
+let width = 12;
+let height = 12;
 let numberOfCells = width * height;
 let array = Array(numberOfCells).fill(0);
 let canva = document.getElementById("canva");
@@ -49,8 +49,65 @@ let row = document.getElementById("row");
 let debug = row.children[0];
 let bstart = row.children[1];
 let pause = row.children[2];
+pause.classList.add("invisible");
 let restart = row.children[3];
+restart.classList.add("invisible");
 let interval;
+let debugState = false;
+let runningState = false;
+
+function debugFunction() {
+  debugState = !debugState;
+
+  if (debugState) {
+    cells.forEach((td) => {
+      td.style.border = `1px solid black`;
+      let p = td.querySelector("p");
+      let span = td.querySelector("span");
+      p.classList.remove("invisible");
+      span.classList.remove("invisible");
+    });
+  } else {
+    cells.forEach((td) => {
+      td.style.border = `none`;
+      let p = td.querySelector("p");
+      let span = td.querySelector("span");
+      p.classList.add("invisible");
+      span.classList.add("invisible");
+    });
+  }
+}
+
+function startFunction() {
+  runningState = !runningState;
+  interval = setInterval(loop, 175);
+  bstart.classList.add("invisible");
+  pause.classList.remove("invisible");
+  restart.classList.remove("invisible");
+}
+
+function pauseFunction() {
+  runningState = !runningState;
+  clearInterval(interval);
+  bstart.classList.remove("invisible");
+  pause.classList.add("invisible");
+}
+
+function restartFunction() {
+  runningState = !runningState;
+  clearInterval(interval);
+  bstart.classList.remove("invisible");
+  pause.classList.add("invisible");
+  restart.classList.add("invisible");
+  array = Array(numberOfCells).fill(0);
+  updateTable();
+  ignition();
+}
+
+debug.onclick = debugFunction;
+bstart.onclick = startFunction;
+pause.onclick = pauseFunction;
+restart.onclick = restartFunction;
 
 function searchTable(row, col) {
   return row * width + col;
@@ -70,9 +127,11 @@ function createTable() {
       let p = document.createElement("p");
       p.innerText = array[index];
       p.style.fontSize = `${cellSize * 0.4}px`;
+      p.classList.add("invisible");
       let span = document.createElement("span");
       span.innerText = index;
       span.style.fontSize = `${cellSize * 0.3}px`;
+      span.classList.add("invisible");
 
       td.appendChild(p);
       td.appendChild(span);
@@ -102,7 +161,7 @@ function propagation() {
     for (let x = 0; x < width - 1; x++) {
       let index = searchTable(x, y);
       let indexBelow = index + height;
-      let randInt = Math.floor(Math.random() * 15);
+      let randInt = Math.floor(Math.random() * 12);
 
       array[index] = Math.max(array[indexBelow] - randInt, 0);
     }
@@ -116,6 +175,14 @@ function updateTable() {
 
       cells[index].style.background = palette[array[index]];
 
+      if (array[index] < 16 && debugState) {
+        cells[index].style.border = "1px solid white";
+        cells[index].style.color = "white";
+      } else if (array[index] >= 16 && debugState) {
+        cells[index].style.border = "1px solid black";
+        cells[index].style.color = "black";
+      }
+
       let p = cells[index].querySelector("p");
       p.innerText = array[index];
     }
@@ -124,8 +191,8 @@ function updateTable() {
 
 function start() {
   createTable();
-  ignition();
   updateTable();
+  ignition();
 }
 
 function loop() {
